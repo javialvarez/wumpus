@@ -1,0 +1,88 @@
+
+public class Casilla {
+
+        private int oro;
+        private int wumpus;
+        private int pozo;
+        private int brisa;
+        private int hedor;
+        private int jugador;
+        private int visitado;
+        private int salida;
+        
+        public Casilla(int oro, int wumpus, int pozo, int brisa, int hedor, int jugador, int visitado, int salida){
+            oro = 0;
+            wumpus = 0;
+            pozo = 0;
+            brisa = 0;
+            hedor = 0;
+            jugador= 0;
+            visitado=0;
+            salida=0;
+
+        }
+
+        public int getoro() {
+            return oro;
+        }
+
+        public int getwumpus() {
+            return wumpus;
+        }
+
+        public int getpozo() {
+            return pozo;
+        }
+
+        public int getbrisa() {
+            return brisa;
+        }
+
+        public int gethedor() {
+            return hedor;
+        }
+
+        public int getjugador() {
+            return jugador;
+        }
+        
+        public int getvisitado() {
+            return visitado;
+        }
+        
+        public int getsalida() {
+            return salida;
+        }
+
+        public void setoro(int oro){
+            this.oro = oro;
+        }
+
+        public void setwumpus(int wumpus) {
+            this.wumpus = wumpus;
+        }
+
+        public void setpozo(int pozo) {
+            this.pozo = pozo;
+        }
+
+        public void setbrisa(int brisa) {
+            this.brisa = brisa;
+        }
+
+        public void sethedor(int hedor) {
+            this.hedor = hedor;
+        }
+
+        public void setjugador(int jugador) {
+            this.jugador = jugador;
+        }
+        
+        public void setvisitado(int visitado) {
+            this.visitado = visitado;
+        }
+        
+        public void setsalida(int salida) {
+            this.salida = salida;
+        }
+    }
