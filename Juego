@@ -1,0 +1,405 @@
+
+import java.util.*;
+
+
+public class Juego{
+    public static void main(String[] args) {
+        Scanner s= new Scanner(System.in);
+        Random r= new Random(System.nanoTime());
+        boolean fin= false;
+        boolean oroconseguido=false;
+        
+        System.out.print("Introduce n (dimensiones tablero n x n): ");
+        int n= s.nextInt();
+        System.out.print("Introduce Numero Flechas: ");
+        int flechas = s.nextInt();
+        System.out.print("Introduce Numero Pozos: ");
+        int pozos = s.nextInt();
+        System.out.println();
+        System.out.println("INSTRUCCIONES: ");
+        System.out.println("    -Avanzar: w ");
+        System.out.println("    -Retrasar: s ");
+        System.out.println("    -Derecha: d ");
+        System.out.println("    -Izquierda: a ");
+        System.out.println("    -Lanzar flecha: m ");
+        System.out.println();
+        System.out.println("POSICIONES: ");
+        System.out.println("    -Jugador: o ");
+        System.out.println("    -Brisa: b ");
+        System.out.println("    -Hedor: h ");
+        System.out.println("    -Oro: g ");
+        System.out.println("    -Wumpus: w ");
+        System.out.println("    -Pozo: p ");
+        System.out.println();
+
+        Casilla[][] grid, gridactual;
+        grid = new Casilla[n][n];
+        gridactual = new Casilla[n][n];
+
+        for (int u = 0; u<n; u++){ //inicializar todas las casillas a 0
+            for (int q = 0; q<n; q++){
+                grid[u][q]= new Casilla(0,0,0,0,0,0,0,0);
+                gridactual[u][q]= new Casilla(0,0,0,0,0,0,0,0);
+            }
+        }
+
+        for (int j = 0; j<1; j++){ //situar salida en una pared
+            int x = r.nextInt(n);
+            int y = r.nextInt(n);
+            if(x==0 || x==n-1 || y==0 || y==n-1 ){
+                grid[x][y].setsalida(1);
+                grid[x][y].setvisitado(1);
+            }
+            else
+                j--;
+        }
+
+        for (int j = 0; j<1; j++){ //situamos wumpi aleatoriamente
+            int x = r.nextInt(n);
+            int y = r.nextInt(n);
+            if(grid[x][y].getsalida() == 0)
+                grid [x][y].setwumpus(1);
+            else
+                j--;
+        }
+
+        for (int j = 0; j<pozos; j++){ //situar pozos aleatoriamente
+            int x = r.nextInt(n);
+            int y = r.nextInt(n);
+            if(grid[x][y].getsalida() == 0 && grid[x][y].getwumpus() == 0)
+                grid[x][y].setpozo(1);
+            else
+                j--;
+        }
+
+        for (int j = 0; j<1; j++){ //situar oro aleatoriamente
+            int x = r.nextInt(n);
+            int y = r.nextInt(n);  
+            if (grid[x][y].getsalida() == 0 && grid[x][y].getwumpus() == 0 && grid[x][y].getpozo() == 0 )
+                grid[x][y].setoro(1);
+            else
+                j--;
+        }
+
+        for (int j = 0; j<1; j++){ //situar jugador aleatoriamente
+            int x = r.nextInt(n);
+            int y = r.nextInt(n);  
+            if (grid[x][y].getsalida() == 0 && grid[x][y].getwumpus() == 0 && grid[x][y].getpozo() == 0 && grid[x][y].getoro() == 0)
+                grid[x][y].setjugador(1);
+            else
+                j--;
+
+        }
+
+        for(int j = 0; j<n; j++) // situar hedor y brisas alrededor del wumper y los pozos
+            for(int k = 0; k<n; k++){
+                if (grid[j][k].getwumpus() == 1){ //situamos hedor alrededor del wumpi
+                    if(j>0)
+                        grid[j-1][k].sethedor(1);
+                    if(j<n-1)
+                        grid[j+1][k].sethedor(1);
+                    if(k>0)
+                        grid[j][k-1].sethedor(1);
+                    if(k<n-1)
+                        grid[j][k+1].sethedor(1);
+                }
+
+                if (grid[j][k].getpozo() == 1){ //situamos brisa alrededor de los pozos
+                    if(j>0)
+                        grid[j-1][k].setbrisa(1);
+                    if(j<n-1)
+                        grid[j+1][k].setbrisa(1);
+                    if(k>0)
+                        grid[j][k-1].setbrisa(1);
+                    if(k<n-1)
+                        grid[j][k+1].setbrisa(1);
+                }
+            }
+
+        for (int u = 0; u<n; u++){ //dibujar tablero
+            for (int q = 0; q<n; q++){ 
+                if  (grid[u][q].getvisitado()==0 && grid[u][q].getjugador()==0){ //ponemos 'x' a lo que todavía no se ha visitado
+                    System.out.print('x');
+                    System.out.print("  ");
+                }
+                else{ //en el caso de haber visitado la casilla se dibuja con cada letra el contenido de la casilla
+
+                    if(grid[u][q].getjugador()==1 ){
+                        System.out.print('o');
+                        System.out.print("  ");
+                    }
+                    else if(grid[u][q].getsalida()==1){
+                        System.out.print('s');
+                        System.out.print("  ");
+                    }
+                    else if(grid[u][q].getwumpus()==1){
+                        System.out.print('w');
+                        System.out.print("  ");
+                    }
+                    else if(grid[u][q].getpozo()==1){
+                        System.out.print('p');
+                        System.out.print("  ");
+                    }
+                    else if(grid[u][q].getoro()==1){
+                        System.out.print('g');
+                        System.out.print("  ");
+                    }
+                    else if(grid[u][q].getbrisa()==1 && grid[u][q].getwumpus()==0){
+                        System.out.print('b');
+                        System.out.print("  ");
+                    }
+                    else if(grid[u][q].gethedor()==1 && grid[u][q].getpozo()==0){
+                        System.out.print('h');
+                        System.out.print("  ");
+                    }
+                    else{
+                        System.out.print('-');
+                        System.out.print("  ");
+                    }
+                }
+            }
+            System.out.println();
+        }
+
+        
+        for (int u = 0; u<n; u++){ //situación de la casilla
+            for (int q = 0; q<n; q++){ 
+                if  (grid[u][q].getjugador()==1){
+                    if(grid[u][q].getwumpus()==1){
+                        System.out.print("WUMPUS fin del juego \n");
+                        fin=true;
+                    }
+                    else if(grid[u][q].getpozo()==1){
+                        System.out.print("POZO fin del juego \n");
+                        fin=true;
+                    }
+                    else if(grid[u][q].getoro()==1){
+                        System.out.print("ORO \n");
+                        oroconseguido=true;
+                    }
+                    else if(grid[u][q].getbrisa()==1)
+                        System.out.print("BRISA \n");
+                    else if(grid[u][q].gethedor()==1)
+                        System.out.print("HEDOR \n");
+                    else if(grid[u][q].getsalida()==1 && oroconseguido==true){
+                        System.out.print("¡¡¡GANADOR!!! \n");
+                        fin=true;
+                    }
+                }
+            }
+        }
+
+        while (fin==false){
+
+            System.out.println();
+            System.out.print("Movimiento: ");
+            String m = s.next();
+            if (m.equals("d")){
+                for (int u=0; u<n; u++){ 
+                    for (int q = n-1; q>-1; q--){ 
+                        if(grid[u][q].getjugador()==1 && q<n-1){
+                            grid[u][q].setjugador(0);
+                            grid[u][q+1].setjugador(1);
+                            grid[u][q].setvisitado(1);
+                        }
+                    }
+                }
+            }
+
+            if (m.equals("a")){
+                for (int u = 0; u<n; u++){ 
+                    for (int q = 0; q<n; q++){ 
+                        if(grid[u][q].getjugador()==1 && q>0){
+                            grid[u][q].setjugador(0);
+                            grid[u][q-1].setjugador(1);
+                            grid[u][q].setvisitado(1);
+                        }
+                    }
+                }
+            }
+
+            if (m.equals("s")){
+                for (int u = n-1; u>-1; u--){ 
+                    for (int q = 0; q<n; q++){ 
+                        if(grid[u][q].getjugador()==1 && u<n-1 ){
+                            grid[u][q].setjugador(0);
+                            grid[u+1][q].setjugador(1);
+                            grid[u][q].setvisitado(1);
+                        }
+                    }
+                }
+            }
+
+            if (m.equals("w")){
+                for (int u = 0; u<n; u++){ 
+                    for (int q = 0; q<n; q++){ 
+                        if(grid[u][q].getjugador()==1 && u>0){
+                            grid[u][q].setjugador(0);
+                            grid[u-1][q].setjugador(1);
+                            grid[u][q].setvisitado(1);
+                        }
+                    }
+                }
+            }
+
+            if (m.equals("m") && flechas>0){
+                System.out.print("¿Hacia qué dirección quieres matar?: ");
+                String v = s.next();
+
+                if (v.equals("d")){
+                    for (int u=0; u<n; u++){ 
+                        for (int q = n-1; q>-1; q--){ 
+                            if(grid[u][q].getjugador()==1 && q<n-1){
+
+                                if(grid[u][q+1].getwumpus()==1){
+                                    System.out.println("WUMPUS ELIMINADO");
+                                    grid[u][q+1].setwumpus(0);
+                                    flechas--;
+                                }
+                                else{
+                                    System.out.println("WUMPUS NO SE ENCUENTRA EN ESTA POSICIÓN");
+                                    flechas--;
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+                if (v.equals("a")){
+                    for (int u = 0; u<n; u++){ 
+                        for (int q = 0; q<n; q++){ 
+                            if(grid[u][q].getjugador()==1 && q>0){
+                                if(grid[u][q-1].getwumpus()==1){
+                                    System.out.println("WUMPUS ELIMINADO");
+                                    grid[u][q-1].setwumpus(0);
+                                    flechas--;
+                                }
+                                else{
+                                    System.out.println("WUMPUS NO SE ENCUENTRA EN ESTA POSICIÓN");
+                                    flechas--;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (v.equals("s")){
+                    for (int u = n-1; u>-1; u--){ 
+                        for (int q = 0; q<n; q++){ 
+                            if(grid[u][q].getjugador()==1 && u<n-1 ){
+                                if(grid[u+1][q].getwumpus()==1){
+                                    System.out.println("WUMPUS ELIMINADO");
+                                    grid[u+1][q].setwumpus(0);
+                                    flechas--;
+                                }
+                                else{
+                                    System.out.println("WUMPUS NO SE ENCUENTRA EN ESTA POSICIÓN");
+                                    flechas--;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (v.equals("w")){
+                    for (int u = 0; u<n; u++){ 
+                        for (int q = 0; q<n; q++){ 
+                            if(grid[u][q].getjugador()==1 && u>0){
+                                if(grid[u-1][q].getwumpus()==1){
+                                    System.out.println("WUMPUS ELIMINADO");
+                                    grid[u-1][q].setwumpus(0);
+                                    flechas--;
+                                }
+                                else{
+                                    System.out.println("WUMPUS NO SE ENCUENTRA EN ESTA POSICIÓN");
+                                    flechas--;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }else if(m.equals("m") && flechas<1)
+                System.out.println("No quedan flechas");
+
+            System.out.println();
+
+            for (int u = 0; u<n; u++){ //dibujar tablero
+                for (int q = 0; q<n; q++){ 
+                    if  (grid[u][q].getvisitado()==0 && grid[u][q].getjugador()==0){
+                        System.out.print('x');
+                        System.out.print("  ");
+                    }
+                    else{
+                        if(grid[u][q].getjugador()==1 ){
+                            System.out.print('o');
+                            System.out.print("  ");
+                        }
+                        else if(grid[u][q].getsalida()==1){
+                            System.out.print('s');
+                            System.out.print("  ");
+                        }
+                        else if(grid[u][q].getwumpus()==1){
+                            System.out.print('w');
+                            System.out.print("  ");
+                        }
+                        else if(grid[u][q].getpozo()==1){
+                            System.out.print('p');
+                            System.out.print("  ");
+                        }
+                        else if(grid[u][q].getoro()==1){
+                            System.out.print('g');
+                            System.out.print("  ");
+                        }
+                        else if(grid[u][q].getbrisa()==1 && grid[u][q].getwumpus()==0){
+                            System.out.print('b');
+                            System.out.print("  ");
+                        }
+                        else if(grid[u][q].gethedor()==1 && grid[u][q].getpozo()==0){
+                            System.out.print('h');
+                            System.out.print("  ");
+                        }
+                        else{
+                            System.out.print('-');
+                            System.out.print("  ");
+                        }
+                    }
+
+                }
+                System.out.println();
+            }
+            System.out.println();
+            
+            for (int u = 0; u<n; u++){ //situación de la casilla
+                for (int q = 0; q<n; q++){ 
+                    if  (grid[u][q].getjugador()==1){
+                        if(grid[u][q].getwumpus()==1){
+                            System.out.print("WUMPUS fin del juego \n");
+                            fin=true;
+                        }
+                        else if(grid[u][q].getpozo()==1){
+                            System.out.print("POZO fin del juego \n");
+                            fin=true;
+                        }
+                        else if(grid[u][q].getoro()==1){
+                            System.out.print("ORO \n");
+                            oroconseguido=true;
+                        }
+                        else if(grid[u][q].getbrisa()==1)
+                            System.out.print("BRISA \n");
+                        else if(grid[u][q].gethedor()==1)
+                            System.out.print("HEDOR \n");
+                        else if(grid[u][q].getsalida()==1 && oroconseguido==true){
+                            System.out.print("¡¡¡GANADOR!!! \n");
+                            fin=true;
+                        }
+
+                        
+                    }
+                }
+            }
+
+        }
+    }
+}
